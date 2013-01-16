@@ -1,0 +1,7 @@
+name = TopBar Message
+core = 7.x
+package = TopBar
+description = TopBar Message integration.
+core = "7.x"
+project = "topbar_msg"
+files[] = plugins/topbar_msg_context_reaction_add.inc

@@ -1,0 +1,147 @@
+<?php
+/**
+ * @file
+ * TopBarMsg integration.
+ */
+
+/**
+ * Push message.
+ *
+ * @param array $messages
+ *   An associative array containing:
+ *   - element: Arguments for TopBarMsg JS.
+ */
+function topbar_msg_say($messages = array()) {
+  drupal_add_js(array('TopBarMsg' => $messages), 'setting');
+}
+function topbar_msg_menu() {
+  $items = array();
+
+  $items['admin/config/system/topmessage'] = array(
+    'title' => t('Top Message Settings'),
+    'description' => t('General settings for topbar message'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('topbar_msg_settings'),
+    'access arguments' => array('administer topbar_msg'),
+    'type' => MENU_NORMAL_ITEM,
+  );
+  return $items;
+}
+
+/**
+ * TopBarMsg add js.
+ */
+function topbar_msg_add_js() {
+  $module_path = drupal_get_path('module', 'topbar_msg');
+  drupal_add_css($module_path . '/topbar_msg.css');
+  drupal_add_js($module_path . '/topbar_msg.js');
+  topbar_msg_get_messages();
+}
+
+/**
+ * Getting latest message from content type
+ */
+function topbar_msg_get_messages() {
+	global $user;
+	$nid = db_query("select nid from {node} where type='topbar_message' ORDER BY created desc LIMIT 0, 1")->fetchField();
+	$node = node_load($nid);
+	$messages = array();	
+	if (!empty($node)) {
+		$messages['message'] = $node->title;
+		$messages['link_text'] = $node->field_link_text['und'][0]['value'];
+		$messages['link'] = $node->field_link['und'][0]['value'];
+  }
+  else {
+		$messages['message'] = 'No message added yet';
+		$messages['link_text'] = 'Click Here';
+		$messages['link'] = url('<front>', array('absolute' => true));
+  }
+  $messages['autohide'] = variable_get('topbar_msg_autohide', TRUE);
+  $messages['autohide_seconds'] = variable_get('topbar_msg_autohide_seconds', 5);
+	topbar_msg_say($messages);	
+}
+/**
+ * Topbar message autohide settings
+ */
+function topbar_msg_settings() {
+  $form = array();
+  $form['topbar_msg_autohide'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Autohide topbar'),
+    '#default_value' => variable_get('topbar_msg_autohide', TRUE),
+  );
+  $form['topbar_msg_autohide_seconds'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Number of seconds'),
+    '#default_value' => variable_get('topbar_msg_autohide_seconds', 5),
+  );
+  if (module_exists('context')) {
+    $form['topbar_msg_context'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Use Context to choose when TopBar message is added to the page.'),
+      '#description' => t('The TopBar message code will be included on all pages of your site by default. You can use <a href="!context_url">Context module</a> to fine tune when and where it will be displayed.', array('!context_url' => url('admin/structure/context'))),
+      '#default_value' => variable_get('topbar_msg_context', 0),
+    );
+  }
+  return system_settings_form($form);
+}
+
+
+/**
+ * Implements hook_footer().
+ */
+function topbar_msg_page_alter(&$page) {
+  if (variable_get('topbar_msg_enable', 1)) {
+    if (!variable_get('topbar_msg_context', 0)) {
+      topbar_msg_add_js();
+    }
+    else {
+      if ($plugin = context_get_plugin('reaction', 'topbar_msg_add')) {
+        if ($plugin->execute()) {
+          topbar_msg_add_js();
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_context_registry().
+ */
+function topbar_msg_context_registry() {
+  return array(
+    'reactions' => array(
+      'topbar_msg_add' => array(
+        'title' => t('TopBar Message '),
+        'plugin' => 'topbar_msg_context_reaction_add',
+        'description' => t('Add TopBar message code to the page'),
+      ),
+    ),
+  );
+}
+
+/**
+ * Notify CTools that we'll be using the plugin API with Context module.
+ */
+function topbar_msg_ctools_plugin_api($module, $api) {
+  if ($module == 'context' && $api == 'plugins') {
+    return array('version' => 3);
+  }
+}
+
+/**
+ * CTools plugin API hook for Context.
+ */
+function topbar_msg_context_plugins() {
+  $plugins = array();
+  $plugins['topbar_msg_context_reaction_add'] = array(
+    'handler' => array(
+      'path' => drupal_get_path('module', 'topbar_msg') . '/plugins',
+      'file' => 'topbar_msg_context_reaction_add.inc',
+      'class' => 'topbar_msg_context_reaction_add',
+      'parent' => 'context_reaction',
+    ),
+  );
+
+  return $plugins;
+}
