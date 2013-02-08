@@ -10,7 +10,6 @@
 #topbarmsg-container {
   height: 33px; 
   border-bottom-width: 3px; 
-  background-color: #45AB35; 
   color: rgb(255, 255, 255); 
   line-height: 30px; 
   top: 0px;
@@ -36,7 +35,6 @@
 #topbarmsg-open {
   display:none;
   border-radius: 0px 0px 4px 4px; 
-  background-color: #45AB35; 
   float:right;
   color:#ffffff;
   padding:2px;

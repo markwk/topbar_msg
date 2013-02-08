@@ -12,6 +12,8 @@
 			  text += '</div><a href="#close" id="topbarmsg-open" style="">Open</a>';
 		      $('body').prepend(text);
 	          $('body').css({"padding-top" : "30px"});
+              $('div#topbarmsg-container').css({"background-color" : "#" + settings.TopBarMsg.color});
+              $('a#topbarmsg-open').css({"background-color" : "#" + settings.TopBarMsg.color});
 		   if (settings.TopBarMsg.autohide) {
 			  var seconds = !isNaN(settings.TopBarMsg.autohide_seconds) ? settings.TopBarMsg.autohide_seconds*1000 : 5000;
 	          setting_timeout(seconds);

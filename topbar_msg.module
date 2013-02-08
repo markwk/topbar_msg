@@ -42,23 +42,25 @@ function topbar_msg_add_js() {
  * Getting latest message from content type
  */
 function topbar_msg_get_messages() {
-	global $user;
-	$nid = db_query("select nid from {node} where type='topbar_message' ORDER BY created desc LIMIT 0, 1")->fetchField();
-	$node = node_load($nid);
-	$messages = array();	
-	if (!empty($node)) {
-		$messages['message'] = $node->title;
-		$messages['link_text'] = $node->field_link_text['und'][0]['value'];
-		$messages['link'] = $node->field_link['und'][0]['value'];
+  global $user;
+  $nid = db_query("select nid from {node} where type='topbar_message' ORDER BY created desc LIMIT 0, 1")->fetchField();
+  $node = node_load($nid);
+  $messages = array();	
+  if (!empty($node)) {
+    $messages['message'] = $node->title;
+    $messages['link_text'] = $node->field_link_text['und'][0]['value'];
+    $messages['link'] = $node->field_link['und'][0]['value'];
+    $messages['color'] = '45AB35';
   }
   else {
-		$messages['message'] = 'No message added yet';
-		$messages['link_text'] = 'Click Here';
-		$messages['link'] = url('<front>', array('absolute' => true));
+    $messages['message'] = 'No message added yet';
+    $messages['link_text'] = 'Click Here';
+    $messages['link'] = url('<front>', array('absolute' => true));
+    $messages['color'] = variable_get('topbar_msg_color', '45AB35');
   }
   $messages['autohide'] = variable_get('topbar_msg_autohide', TRUE);
   $messages['autohide_seconds'] = variable_get('topbar_msg_autohide_seconds', 5);
-	topbar_msg_say($messages);	
+  topbar_msg_say($messages);	
 }
 /**
  * Topbar message autohide settings
@@ -75,6 +77,21 @@ function topbar_msg_settings() {
     '#title' => t('Number of seconds'),
     '#default_value' => variable_get('topbar_msg_autohide_seconds', 5),
   );
+  
+  if (module_exists('jquery_colorpicker')) { 
+    $form['topbar_msg_color'] = array(
+      '#type' => 'jquery_colorpicker',
+      '#title' => t('Color'),
+      '#default_value' => variable_get('topbar_msg_color', '45AB35'),
+    );
+  }else{ 
+    $form['topbar_msg_color_msg'] = array(
+      '#type' => 'markup',
+      '#markup' => t('Please install Color module to change the topbar color settings.'),
+    );
+  }
+  
+  
   if (module_exists('context')) {
     $form['topbar_msg_context'] = array(
       '#type' => 'checkbox',
