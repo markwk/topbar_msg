@@ -50,18 +50,19 @@ function topbar_msg_get_messages() {
     $messages['message'] = $node->title;
     $messages['link_text'] = $node->field_link_text['und'][0]['value'];
     $messages['link'] = $node->field_link['und'][0]['value'];
-    $messages['color'] = '45AB35';
+    $messages['color'] = variable_get('color', '#45AB35');
   }
   else {
     $messages['message'] = 'No message added yet';
     $messages['link_text'] = 'Click Here';
     $messages['link'] = url('<front>', array('absolute' => true));
-    $messages['color'] = variable_get('topbar_msg_color', '45AB35');
+    $messages['color'] = variable_get('color', '#45AB35');
   }
   $messages['autohide'] = variable_get('topbar_msg_autohide', TRUE);
   $messages['autohide_seconds'] = variable_get('topbar_msg_autohide_seconds', 5);
   topbar_msg_say($messages);	
 }
+
 /**
  * Topbar message autohide settings
  */
@@ -78,11 +79,29 @@ function topbar_msg_settings() {
     '#default_value' => variable_get('topbar_msg_autohide_seconds', 5),
   );
   
-  if (module_exists('jquery_colorpicker')) { 
-    $form['topbar_msg_color'] = array(
-      '#type' => 'jquery_colorpicker',
+  if (module_exists('color')) { 
+    
+    drupal_add_css('misc/farbtastic/farbtastic.css');
+    drupal_add_js('misc/farbtastic/farbtastic.js');
+
+    $form['color'] = array(
+      '#type' => 'textfield',
       '#title' => t('Color'),
-      '#default_value' => variable_get('topbar_msg_color', '45AB35'),
+      '#default_value' => variable_get('color', '#45AB35'),
+      '#maxlength' => 7,
+      '#size' => 7,
+      '#description' => '<div id="color-picker"></div>',
+    );
+
+    $form['colorpicker_example'] = array(
+      '#type' => 'item',
+      '#description' => "<script type='text/javascript'>
+        (function($) { 
+          $(document).ready(function() {
+            $('#color-picker').farbtastic('#edit-color');
+          });
+          }) (jQuery);
+      </script>",
     );
   }else{ 
     $form['topbar_msg_color_msg'] = array(
