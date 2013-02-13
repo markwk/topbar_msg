@@ -12,8 +12,10 @@
 			  text += '</div><a href="#close" id="topbarmsg-open" style="">Open</a>';
 		      $('body').prepend(text);
 	          $('body').css({"padding-top" : "30px"});
-              $('div#topbarmsg-container').css({"background-color" : settings.TopBarMsg.color});
-              $('a#topbarmsg-open').css({"background-color" : settings.TopBarMsg.color});
+              $('div#topbarmsg-container').css({"background-color" : settings.TopBarMsg.color_bg});
+              $('a#topbarmsg-open').css({"background-color" : settings.TopBarMsg.color_bg});
+              $('div#topbarmsg-container').css({"color" : settings.TopBarMsg.color_text});
+              $('div#topbarmsg-container a#topbarmsg-logo').css({"color" : settings.TopBarMsg.color_link});
 		   if (settings.TopBarMsg.autohide) {
 			  var seconds = !isNaN(settings.TopBarMsg.autohide_seconds) ? settings.TopBarMsg.autohide_seconds*1000 : 5000;
 	          setting_timeout(seconds);
