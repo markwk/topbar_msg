@@ -6,7 +6,7 @@
 	      var text = '<div id="topbarmsg-wrapper">';
 	          text += '<div id="topbarmsg-container">';
 	          text += '<div id="topbarmsg-content">'+ settings.TopBarMsg.message;
-	          text += '<a href="'+ settings.TopBarMsg.link +'" title="'+ settings.TopBarMsg.link_text +'" target="_blank" id="topbarmsg-logo">'+ settings.TopBarMsg.link_text +'</a></div>';
+	          text += '<a href="'+ settings.TopBarMsg.link +'" title="'+ settings.TopBarMsg.link_text +'" target="'+ settings.TopBarMsg.link_target +'" id="topbarmsg-logo">'+ settings.TopBarMsg.link_text +'</a></div>';
 			  text += '<a href="#close" id="topbarmsg-close">Close</a>';
 			  text += '<div id="topbarmsg-shadow"></div></div>';
 			  text += '</div><a href="#close" id="topbarmsg-open" style="">Open</a>';
