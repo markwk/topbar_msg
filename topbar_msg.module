@@ -46,6 +46,7 @@ function topbar_msg_get_messages() {
   $query = db_select('node', 'n');
   $query_node = $query->fields('n',array('nid'));
   $query_node->condition('n.type', 'topbar_message');
+  $query_node->condition('n.status', NODE_PUBLISHED);
   $query_node->orderBy('created', 'DESC');
   $query_node->range(0, 1);
   $nid = $query_node->execute()->fetchField();
@@ -56,9 +57,9 @@ function topbar_msg_get_messages() {
   
   $messages = array();	
   if (!empty($node)) {
-    $messages['message'] = $node->title;
-    $messages['link_text'] = $node->field_link_text['und'][0]['value'];
-    $messages['link'] = $node->field_link['und'][0]['value'];
+    $messages['message'] = check_plain($node->title);
+    $messages['link_text'] = check_plain($node->field_link_text['und'][0]['value']);
+    $messages['link'] = check_plain($node->field_link['und'][0]['value']);
     $messages['color_bg'] = variable_get('topbar_msg_color_bg', '#45AB35');
     $messages['color_text'] = variable_get('topbar_msg_color_text', '#ffffff');
     $messages['color_link'] = variable_get('topbar_msg_color_link', '#F3FA25');
