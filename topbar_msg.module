@@ -65,8 +65,8 @@ function topbar_msg_get_messages() {
   }
   else {
     $messages['message'] = 'No message added yet';
-    $messages['link_text'] = 'Click Here';
-    $messages['link'] = url('<front>', array('absolute' => true));
+    $messages['link_text'] = 'Modify Sessings Here';
+    $messages['link'] = url('admin/config/system/topmessage', array('absolute' => true));
     $messages['color_bg'] = variable_get('topbar_msg_color_bg', '#45AB35');
     $messages['color_text'] = variable_get('topbar_msg_color_text', '#ffffff');
     $messages['color_link'] = variable_get('topbar_msg_color_link', '#F3FA25');
@@ -234,4 +234,12 @@ function topbar_msg_context_plugins() {
   );
 
   return $plugins;
+}
+
+function topbar_msg_help($path, $arg) {
+  switch ($path) {
+    // Main module help for the topbar_msg module
+    case 'admin/help#topbar_msg':
+      return '<p>' . t('This module creates a top region area for displaying call-to-action messages and a content type for creating those messages with text for links, etc. To create topbar messages, go to node/add/topbar-message where you can create the messages. Color changes and settings are available on the on the settings page. Display can be set either as site wide or controlled via the context module.', array('@blocks' => url('admin/config/system/topmessage'))) . '</p>';
+  }
 }
