@@ -17,48 +17,34 @@
 }
 #topbarmsg-container a {
   color: #F3FA25;
-  font-family: Georgia,serif;
+  font-family: sans-serif;
   text-decoration:underline;
 }
 #topbarmsg-container a:hover {
   text-decoration:none;
 }
-#topbarmsg-shadow {
-  background: url("images/toolbar.gif") repeat scroll 0 0 transparent;
-  height: 4px;
-  left: 0; 
-  line-height: 4px;
-  overflow: hidden;
-  position: absolute;
-  width: 100%;
-}
 #topbarmsg-open {
   display:none;
-  border-radius: 0px 0px 4px 4px; 
   float:right;
   color:#ffffff;
-  padding:2px;
+  padding:4px;
   text-decoration:none;
   position: fixed; 
   top: 0px;
   z-index: 5000; 
   right:5px;
-  border-bottom:2px solid #aaaaaa; 
-  border-left:2px solid #aaaaaa; 
-  border-right:2px solid #aaaaaa; 
 }
 #topbarmsg-close {
+  width: 25px;
+  text-align: center;
   float:right;
   color:#ffffff;
   background-color: #aaaaaa; 
-  text-decoration:none;
-  padding:0px 2px;
-  border-radius: 4px 4px 0px 0px;
+  text-decoration: none !important;
+  padding:1px 4px;
+  padding-bottom: 2px;
   margin-top:-30px;
-  border-top:2px solid #ffffff; 
-  border-left:2px solid #ffffff; 
-  border-right:2px solid #ffffff;
-  margin-right:5px;
+  cursor: pointer;
 }
 #topbarmsg-container a#topbarmsg-close  {
   color:#ffffff;	
@@ -67,6 +53,7 @@
   margin-left:10px;
 }
 #topbarmsg-content {
+  font-family: sans-serif;
   margin:auto;
   width:80%;
   text-align:center;
