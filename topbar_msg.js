@@ -1,51 +1,75 @@
 (function ($) {
-  jQuery.fn.exists = function(){return this.length>0;}	
-  Drupal.behaviors.topBarMsg = {
-    attach: function(context, settings) {
-		$(document).ready(function() {
-	      var text = '<div id="topbarmsg-wrapper">';
-	          text += '<div id="topbarmsg-container">';
-	          text += '<div id="topbarmsg-content">'+ settings.TopBarMsg.message;
-	          text += '<a href="'+ settings.TopBarMsg.link +'" title="'+ settings.TopBarMsg.link_text +'" target="'+ settings.TopBarMsg.link_target +'" id="topbarmsg-logo">'+ settings.TopBarMsg.link_text +'</a></div>';
-			  text += '<a href="#close" id="topbarmsg-close">Close</a>';
-			  text += '<div id="topbarmsg-shadow"></div></div>';
-			  text += '</div><a href="#close" id="topbarmsg-open" style="">Open</a>';
-		      $('body').prepend(text);
-	          $('body').css({"padding-top" : "30px"});
-              $('div#topbarmsg-container').css({"background-color" : settings.TopBarMsg.color_bg});
-              $('a#topbarmsg-open').css({"background-color" : settings.TopBarMsg.color_bg});
-              $('div#topbarmsg-container').css({"color" : settings.TopBarMsg.color_text});
-              $('div#topbarmsg-container a#topbarmsg-logo').css({"color" : settings.TopBarMsg.color_link});
-		   if (settings.TopBarMsg.autohide) {
-			  var seconds = !isNaN(settings.TopBarMsg.autohide_seconds) ? settings.TopBarMsg.autohide_seconds*1000 : 5000;
-	          setting_timeout(seconds);
-	       }
-		   $("#topbarmsg-open").click(function() {
-	         open_topbar();
-		   });
-		   $("#topbarmsg-close").click(function() {
-	         close_topbar();
-		   });
-		});
-		function setting_timeout(seconds) {
-		  return setTimeout(function() {
-	       close_topbar();
-	      }, seconds);
+    var duration = 500;
+
+	Drupal.behaviors.topBarMsg = {
+        setting_timeout: function(seconds) {
+            return setTimeout(function() {
+                Drupal.behaviors.topBarMsg.close_topbar(true);
+            }, seconds);
+        },
+
+        close_topbar: function($body, animate) {
+            $body.removeClass('topbarmsg-open');
+
+            if(animate) {
+                $body.addClass('topbarmsg-transition');
+                $('#topbarmsg-wrapper').slideUp(duration);
+                $('#topbarmsg-open').slideDown(duration);
+            }
+            else {
+                $('#topbarmsg-wrapper').hide();
+                $('#topbarmsg-open').show();
+            }
+        },
+
+        open_topbar: function($body, animate) {
+            $body.addClass('topbarmsg-open');
+
+            if(animate) {
+                $body.addClass('topbarmsg-transition');
+                $('#topbarmsg-wrapper').slideDown(duration);
+                $('#topbarmsg-open').slideUp(duration);
+            }
+            else {
+                $('#topbarmsg-wrapper').show();
+                $('#topbarmsg-open').hide();
+            }
+        },
+
+		attach: function(context, settings) {
+            var $body = $('body', context);
+
+            $body.once('topbarmsg', function() {
+				var text = '<div id="topbarmsg-wrapper"><div id="topbarmsg-container">',
+                    link = settings.TopBarMsg.link ? '<a href="'+ settings.TopBarMsg.link +'" title="'+ settings.TopBarMsg.link_text +'" target="'+ settings.TopBarMsg.link_target +'" id="topbarmsg-logo">'+ settings.TopBarMsg.link_text +'</a>' : '';
+
+				text += '<div id="topbarmsg-content">' + settings.TopBarMsg.message + link+ '</div>';
+				text += '<a id="topbarmsg-close">Close</a>';
+				text += '<div id="topbarmsg-shadow"></div>';
+				text += '</div></div>';
+                text += '<a id="topbarmsg-open" style="">Open</a>';
+
+                $body.prepend(text);
+
+				$('#topbarmsg-wrapper', $body).hide();
+                $('#topbarmsg-container', $body).css({'color' : settings.TopBarMsg.color_text});
+				$('#topbarmsg-container, #topbarmsg-open', $body).css({'background-color' : settings.TopBarMsg.color_bg});
+				$('#topbarmsg-container #topbarmsg-logo', $body).css({'color' : settings.TopBarMsg.color_link});
+
+				if (settings.TopBarMsg.autohide) {
+					var seconds = !isNaN(settings.TopBarMsg.autohide_seconds) ? settings.TopBarMsg.autohide_seconds * 1000 : 5000;
+
+                    Drupal.behaviors.topBarMsg.setting_timeout(seconds);
+				}
+
+                $('#topbarmsg-open').click(function() {
+                    Drupal.behaviors.topBarMsg.open_topbar($body, true);
+                });
+
+                $('#topbarmsg-close').click(function() {
+                    Drupal.behaviors.topBarMsg.close_topbar($body, true);
+                });
+			});
 		}
-		function close_topbar() {
-		  if (!$('#toolbar').exists()) {	
-		    $('body').animate({ 'padding-top' : '0' }, 'slow');
-		  }
-	      $("#topbarmsg-wrapper").slideUp();
-	      $("#topbarmsg-open").slideDown();	
-		}
-		function open_topbar() {
-	      if (!$('#toolbar').exists()) {	
-		    $('body').animate({ 'padding-top' : '30' }, 'slow');	
-		  }
-		  $("#topbarmsg-wrapper").slideDown();
-		  $("#topbarmsg-open").slideUp();	
-		}
-    }
-  }
+	}
 })(jQuery);
