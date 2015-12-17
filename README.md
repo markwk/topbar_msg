@@ -1,0 +1,1 @@
+Provides a Drupal-only alternative to HelloBar. It creates a top region area for displaying call-to-action messages and an admin UI for creating those messages with text and links, etc.

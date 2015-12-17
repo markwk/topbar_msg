@@ -10,7 +10,6 @@
  * Add TopBar message code to the page.
  */
 class topbar_msg_context_reaction_add extends context_reaction {
-
   function options_form($context) {
     return array(
       'add' => array('#type' => 'value', '#value' => TRUE),
