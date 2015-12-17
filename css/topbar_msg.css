@@ -27,7 +27,7 @@
   color:#FFF;
 }
 #topbarmsg-shadow {
-  background:url('../images/toolbar.gif') repeat scroll 0 0 transparent;
+  background:url('../images/topbar_msg-shadow.gif') repeat scroll 0 0 transparent;
   position:absolute;
   left:0;
   width:100%;
