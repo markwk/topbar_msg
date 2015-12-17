@@ -62,11 +62,40 @@
                     Drupal.behaviors.topBarMsg.setting_timeout(seconds);
 				}
 
+                if (settings.TopBarMsg.cookie) {
+                    if($.cookie('topbar') === null) {
+                        $.cookie('topbar', 'open', {
+                            expires: parseInt(settings.TopBarMsg.cookie_expire),
+                            path:'/'
+                        });
+
+                        Drupal.behaviors.topBarMsg.open_topbar($body, true);
+                    }
+                    else if($.cookie('topbar') == 'open') {
+                        Drupal.behaviors.topBarMsg.open_topbar($body);
+                    }
+                    else if($.cookie('topbar') == 'close') {
+                        Drupal.behaviors.topBarMsg.close_topbar($body);
+                    }
+                }
+
                 $('#topbarmsg-open').click(function() {
+                    if (settings.TopBarMsg.cookie) {
+                        $.cookie('topbar', 'open', {
+                            path:'/'
+                        });
+                    }
+
                     Drupal.behaviors.topBarMsg.open_topbar($body, true);
                 });
 
                 $('#topbarmsg-close').click(function() {
+                    if (settings.TopBarMsg.cookie) {
+                        $.cookie('topbar', 'close', {
+                            path:'/'
+                        });
+                    }
+
                     Drupal.behaviors.topBarMsg.close_topbar($body, true);
                 });
 			});

@@ -65,6 +65,8 @@ function topbar_msg_get_messages() {
   $messages['color_link'] = variable_get('topbar_msg_color_link', '#FFFFFF');
   $messages['autohide'] = variable_get('topbar_msg_autohide', FALSE);
   $messages['autohide_seconds'] = variable_get('topbar_msg_autohide_seconds', 5);
+  $messages['cookie'] = variable_get('topbar_msg_cookie', FALSE);
+  $messages['cookie_expire'] = variable_get('topbar_msg_cookie_expire', 1);
   $messages['link_target'] = variable_get('topbar_msg_new_window_link', TRUE) == TRUE ? '_blank' : '';
 
   topbar_msg_say($messages);	
@@ -125,6 +127,17 @@ function topbar_msg_settings() {
     '#type' => 'textfield',
     '#title' => t('Autohide seconds'),
     '#default_value' => variable_get('topbar_msg_autohide_seconds', 5),
+    '#maxlength' => '5',
+  );
+  $form['topbar_msg_cookie'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Cookie'),
+    '#default_value' => variable_get('topbar_msg_cookie', FALSE),
+  );
+  $form['topbar_msg_cookie_expire'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Cookie expire (days)'),
+    '#default_value' => variable_get('topbar_msg_cookie_expire', 1),
     '#maxlength' => '5',
   );
 
