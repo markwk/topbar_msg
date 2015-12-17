@@ -26,6 +26,7 @@ function topbar_msg_permission() {
     ),
   );
 }
+
 function topbar_msg_menu() {
   $items = array();
 
@@ -37,6 +38,7 @@ function topbar_msg_menu() {
     'access arguments' => array('administer topbar_msg'),
     'type' => MENU_NORMAL_ITEM,
   );
+
   return $items;
 }
 
@@ -45,144 +47,152 @@ function topbar_msg_menu() {
  */
 function topbar_msg_add_js() {
   $module_path = drupal_get_path('module', 'topbar_msg');
+
   drupal_add_css($module_path . '/topbar_msg.css');
   drupal_add_js($module_path . '/topbar_msg.js');
   topbar_msg_get_messages();
 }
 
 /**
- * Getting latest message from content type
+ * Getting latest message from variables
  */
 function topbar_msg_get_messages() {
-  
-  $query = db_select('node', 'n');
-  $query_node = $query->fields('n',array('nid'));
-  $query_node->condition('n.type', 'topbar_message');
-  $query_node->condition('n.status', NODE_PUBLISHED);
-  $query_node->orderBy('created', 'DESC');
-  $query_node->range(0, 1);
-  $nid = $query_node->execute()->fetchField();
-  
-  if (!empty($nid)) {
-    $node = node_load($nid);
-  }
-  
-  $messages = array();	
-  if (!empty($node)) {
-    $messages['message'] = check_plain($node->title);
-    $messages['link_text'] = check_plain($node->field_link_text['und'][0]['value']);
-    $messages['link'] = check_plain($node->field_link['und'][0]['value']);
-    $messages['color_bg'] = variable_get('topbar_msg_color_bg', '#45AB35');
-    $messages['color_text'] = variable_get('topbar_msg_color_text', '#ffffff');
-    $messages['color_link'] = variable_get('topbar_msg_color_link', '#F3FA25');
-  }
-  else {
-    $messages['message'] = 'No message added yet';
-    $messages['link_text'] = 'Modify Sessings Here';
-    $messages['link'] = url('admin/config/system/topmessage', array('absolute' => true));
-    $messages['color_bg'] = variable_get('topbar_msg_color_bg', '#45AB35');
-    $messages['color_text'] = variable_get('topbar_msg_color_text', '#ffffff');
-    $messages['color_link'] = variable_get('topbar_msg_color_link', '#F3FA25');
-  }
-  $messages['autohide'] = variable_get('topbar_msg_autohide', TRUE);
+  $messages['message'] = variable_get('topbar_msg_message', 'No message added yet');
+  $messages['link_text'] = variable_get('topbar_msg_link_text', 'Modify Settings');
+  $messages['link'] = variable_get('topbar_msg_link', 'admin/config/system/topmessage');
+  $messages['color_bg'] = variable_get('topbar_msg_color_bg', '#C79F27');
+  $messages['color_text'] = variable_get('topbar_msg_color_text', '#FFFFFF');
+  $messages['color_link'] = variable_get('topbar_msg_color_link', '#FFFFFF');
+  $messages['autohide'] = variable_get('topbar_msg_autohide', FALSE);
   $messages['autohide_seconds'] = variable_get('topbar_msg_autohide_seconds', 5);
-  $messages['link_target'] = (variable_get('topbar_msg_new_window_link', TRUE) == TRUE ? '_blank' : '');
+  $messages['link_target'] = variable_get('topbar_msg_new_window_link', TRUE) == TRUE ? '_blank' : '';
+
   topbar_msg_say($messages);	
 }
 
 /**
- * Topbar message autohide settings
+ * Topbar message settings
  */
 function topbar_msg_settings() {
   $form = array();
-  $form['topbar_msg_autohide'] = array(
+
+  $form['topbar_msg_enable'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Autohide topbar'),
-    '#default_value' => variable_get('topbar_msg_autohide', TRUE),
+    '#title' => t('Enable'),
+    '#default_value' => variable_get('topbar_msg_enable', 0),
+  );
+  $form['topbar_msg_display'] = array(
+    '#type' => 'radios',
+    '#title' => t('Display'),
+    '#default_value' => variable_get('topbar_msg_display', 0),
+    '#options' => array(
+      t('Everywhere'),
+      t('Just Homepage'),
+      t('Everywhere but Homepage'),
+    ),
+  );
+  $form['topbar_msg_message'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Message'),
+    '#default_value' => variable_get('topbar_msg_message', 'No message added yet'),
+    '#maxlength' => '100',
+    '#description' => 'Max length: 100 characters.',
+  );
+  $form['topbar_msg_link_text'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Link Text'),
+    '#default_value' => variable_get('topbar_msg_link_text', 'Modify Settings'),
+    '#maxlength' => '15',
+    '#description' => 'Max length: 15 characters.',
+  );
+  $form['topbar_msg_link'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Link'),
+    '#default_value' => variable_get('topbar_msg_link', 'admin/config/system/topmessage'),
+    '#description' => 'Prepend protocol (ie. http://) for external URLs.',
   );
   $form['topbar_msg_new_window_link'] = array(
     '#type' => 'checkbox',
     '#title' => t('Open Link in new window'),
     '#default_value' => variable_get('topbar_msg_new_window_link', TRUE),
   );
+  $form['topbar_msg_autohide'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Autohide'),
+    '#default_value' => variable_get('topbar_msg_autohide', FALSE),
+  );
   $form['topbar_msg_autohide_seconds'] = array(
     '#type' => 'textfield',
-    '#title' => t('Number of seconds'),
+    '#title' => t('Autohide seconds'),
     '#default_value' => variable_get('topbar_msg_autohide_seconds', 5),
+    '#maxlength' => '5',
   );
-  
-  if (module_exists('color')) {  
+
+  if (module_exists('color')) {
     drupal_add_css('misc/farbtastic/farbtastic.css');
     drupal_add_js('misc/farbtastic/farbtastic.js');
 
     $form['topbar_msg_color_bg'] = array(
       '#type' => 'textfield',
       '#title' => t('Background color'),
-      '#default_value' => variable_get('topbar_msg_color_bg', '#45AB35'),
+      '#default_value' => variable_get('topbar_msg_color_bg', '#C79F27'),
       '#maxlength' => 7,
       '#size' => 7,
       '#description' => '<div id="topbar-msg-color-bg-picker"></div>',
     );
-
     $form['colorpicker_bg'] = array(
       '#type' => 'item',
       '#description' => "<script type='text/javascript'>
-        (function($) { 
+        (function($) {
           $(document).ready(function() {
             $('#topbar-msg-color-bg-picker').farbtastic('#edit-topbar-msg-color-bg');
           });
-          }) (jQuery);
+        }) (jQuery);
       </script>",
     );
-    
     $form['topbar_msg_color_text'] = array(
       '#type' => 'textfield',
       '#title' => t('Text color'),
-      '#default_value' => variable_get('topbar_msg_color_text', '#ffffff'),
+      '#default_value' => variable_get('topbar_msg_color_text', '#FFFFFF'),
       '#maxlength' => 7,
       '#size' => 7,
       '#description' => '<div id="topbar-msg-color-text-picker"></div>',
     );
-
     $form['colorpicker_text'] = array(
       '#type' => 'item',
       '#description' => "<script type='text/javascript'>
-        (function($) { 
+        (function($) {
           $(document).ready(function() {
             $('#topbar-msg-color-text-picker').farbtastic('#edit-topbar-msg-color-text');
           });
-          }) (jQuery);
+        }) (jQuery);
       </script>",
     );
-    
     $form['topbar_msg_color_link'] = array(
       '#type' => 'textfield',
       '#title' => t('Link color'),
-      '#default_value' => variable_get('topbar_msg_color_link', '#F3FA25'),
+      '#default_value' => variable_get('topbar_msg_color_link', '#FFFFFF'),
       '#maxlength' => 7,
       '#size' => 7,
       '#description' => '<div id="topbar-msg-color-link-picker"></div>',
     );
-
     $form['colorpicker_link'] = array(
       '#type' => 'item',
       '#description' => "<script type='text/javascript'>
-        (function($) { 
+        (function($) {
           $(document).ready(function() {
             $('#topbar-msg-color-link-picker').farbtastic('#edit-topbar-msg-color-link');
           });
-          }) (jQuery);
+        }) (jQuery);
       </script>",
     );
-    
-    
-  }else{ 
+  }
+  else {
     $form['topbar_msg_color_msg'] = array(
       '#type' => 'markup',
       '#markup' => t('Please install Color module to change the topbar color settings.'),
     );
   }
-  
   
   if (module_exists('context')) {
     $form['topbar_msg_context'] = array(
@@ -192,22 +202,28 @@ function topbar_msg_settings() {
       '#default_value' => variable_get('topbar_msg_context', 0),
     );
   }
+
   return system_settings_form($form);
 }
 
 
 /**
- * Implements hook_footer().
+ * Implements hook_page_alter().
  */
 function topbar_msg_page_alter(&$page) {
-  if (variable_get('topbar_msg_enable', 1)) {
-    if (!variable_get('topbar_msg_context', 0)) {
-      topbar_msg_add_js();
-    }
-    else {
-      if ($plugin = context_get_plugin('reaction', 'topbar_msg_add')) {
-        if ($plugin->execute()) {
-          topbar_msg_add_js();
+  if (variable_get('topbar_msg_enable', 0)) {
+    $display = variable_get('topbar_msg_display', 0);
+    $is_front = drupal_is_front_page();
+
+    if ($display == 0 || ($display == 1 && $is_front) || ($display == 2 && !$is_front)) {
+      if (!variable_get('topbar_msg_context', 0)) {
+        topbar_msg_add_js();
+      }
+      else {
+        if ($plugin = context_get_plugin('reaction', 'topbar_msg_add')) {
+          if ($plugin->execute()) {
+            topbar_msg_add_js();
+          }
         }
       }
     }
@@ -221,7 +237,7 @@ function topbar_msg_context_registry() {
   return array(
     'reactions' => array(
       'topbar_msg_add' => array(
-        'title' => t('TopBar Message '),
+        'title' => t('TopBar Message'),
         'plugin' => 'topbar_msg_context_reaction_add',
         'description' => t('Add TopBar message code to the page'),
       ),
@@ -259,6 +275,6 @@ function topbar_msg_help($path, $arg) {
   switch ($path) {
     // Main module help for the topbar_msg module
     case 'admin/help#topbar_msg':
-      return '<p>' . t('This module creates a top region area for displaying call-to-action messages and a content type for creating those messages with text for links, etc. To create topbar messages, go to node/add/topbar-message where you can create the messages. Color changes and settings are available on the on the settings page. Display can be set either as site wide or controlled via the context module.', array('@blocks' => url('admin/config/system/topmessage'))) . '</p>';
+      return '<p>' . t('This module creates a top region area for displaying call-to-action messages and a content type for creating those messages with text for links, etc. Topbar messages, color changes, and settings are available on the on the settings page. Display can be set either as site wide or controlled via the context module.', array('@blocks' => url('admin/config/system/topmessage'))) . '</p>';
   }
 }
