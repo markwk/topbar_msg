@@ -48,8 +48,8 @@ function topbar_msg_menu() {
 function topbar_msg_add_js() {
   $module_path = drupal_get_path('module', 'topbar_msg');
 
-  drupal_add_css($module_path . '/topbar_msg.css');
-  drupal_add_js($module_path . '/topbar_msg.js');
+  drupal_add_css($module_path . '/css/topbar_msg.css');
+  drupal_add_js($module_path . '/js/topbar_msg.js');
   topbar_msg_get_messages();
 }
 
