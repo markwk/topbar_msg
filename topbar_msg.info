@@ -1,6 +1,5 @@
-name = TopBar Message
-description = TopBar Message integration.
-package = TopBar
+name = Topbar Message
+description = Add Topbar Message to the page.
 core = 7.x
-configure = admin/config/system/topmessage
+configure = admin/config/system/topbar-message
 files[] = plugins/topbar_msg_context_reaction_add.inc

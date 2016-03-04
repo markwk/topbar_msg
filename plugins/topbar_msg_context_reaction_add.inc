@@ -1,19 +1,18 @@
 <?php
-// $Id:
 
 /**
  * @file
- *   Adds a Context module reaction for the TopBar message module.
+ * Add Topbar Message to page.
  */
 
 /**
- * Add TopBar message code to the page.
+ * Create Context reaction to control Topbar Message display.
  */
 class topbar_msg_context_reaction_add extends context_reaction {
   function options_form($context) {
     return array(
       'add' => array('#type' => 'value', '#value' => TRUE),
-      'note' => array('#type' => 'markup', '#value' => t('TopBar message code will be added to the page.')),
+      'note' => array('#type' => 'markup', '#value' => t('Add Topbar Message to the page.')),
     );
   }
 
@@ -23,6 +22,7 @@ class topbar_msg_context_reaction_add extends context_reaction {
 
   function execute() {
     $contexts = $this->get_contexts();
+
     foreach ($contexts as $context) {
       if (!empty($context->reactions[$this->plugin])) {
         return TRUE;

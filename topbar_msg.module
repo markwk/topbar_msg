@@ -1,245 +1,57 @@
 <?php
+
 /**
  * @file
- * TopBarMsg integration.
+ * Add Topbar Message to the page.
  */
 
 /**
- * Push message.
- *
- * @param array $messages
- *   An associative array containing:
- *   - element: Arguments for TopBarMsg JS.
- */
-function topbar_msg_say($messages = array()) {
-  drupal_add_js(array('TopBarMsg' => $messages), 'setting');
-}
-
-/**
- * Implements hook_permission()
+ * Implements hook_permission().
  */
 function topbar_msg_permission() {
   return array(
     'administer topbar_msg' => array(
-      'title' => t('Administer topbar message module'),
-      'description' => t('Perform administration tasks for topbar message.'),
+      'title' => t('Administer Topbar Message'),
+      'description' => t('Allows users to administer Topbar Message settings.'),
     ),
   );
 }
 
+/**
+ * Implements hook_menu().
+ */
 function topbar_msg_menu() {
   $items = array();
 
-  $items['admin/config/system/topmessage'] = array(
-    'title' => t('Top Message Settings'),
-    'description' => t('General settings for topbar message'),
+  $items['admin/config/system/topbar-message'] = array(
+    'title' => t('Topbar Message'),
+    'description' => t('Configure Topbar Message settings.'),
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('topbar_msg_settings'),
+    'page arguments' => array('topbar_msg_settings_form'),
     'access arguments' => array('administer topbar_msg'),
     'type' => MENU_NORMAL_ITEM,
+    'file' => 'topbar_msg.admin.inc',
   );
 
   return $items;
 }
 
 /**
- * TopBarMsg add js.
+ * Implements hook_help().
  */
-function topbar_msg_add_js() {
-  $module_path = drupal_get_path('module', 'topbar_msg');
-
-  drupal_add_css($module_path . '/css/topbar_msg.css');
-  drupal_add_js($module_path . '/js/topbar_msg.js');
-  topbar_msg_get_messages();
+function topbar_msg_help($path, $arg) {
+  switch ($path) {
+    case 'admin/help#topbar_msg':
+      return t('<p>The Topbar Message module allows the administrator to add a configurable Topbar Message to the page. Display can be set either as site wide or controlled via the context module.</p>');
+  }
 }
 
 /**
- * Getting latest message from variables
+ * Implements hook_ctools_plugin_api().
  */
-function topbar_msg_get_messages() {
-  $messages['message'] = variable_get('topbar_msg_message', 'No message added yet');
-  $messages['link_text'] = variable_get('topbar_msg_link_text', 'Modify Settings');
-  $messages['link'] = variable_get('topbar_msg_link', 'admin/config/system/topmessage');
-  $messages['color_bg'] = variable_get('topbar_msg_color_bg', '#C79F27');
-  $messages['color_text'] = variable_get('topbar_msg_color_text', '#FFFFFF');
-  $messages['color_link'] = variable_get('topbar_msg_color_link', '#FFFFFF');
-  $messages['autohide'] = variable_get('topbar_msg_autohide', FALSE);
-  $messages['autohide_seconds'] = variable_get('topbar_msg_autohide_seconds', 5);
-  $messages['cookie'] = variable_get('topbar_msg_cookie', FALSE);
-  $messages['cookie_expire'] = variable_get('topbar_msg_cookie_expire', 1);
-  $messages['link_target'] = variable_get('topbar_msg_new_window_link', TRUE) == TRUE ? '_blank' : '';
-
-  topbar_msg_say($messages);	
-}
-
-/**
- * Topbar message settings
- */
-function topbar_msg_settings() {
-  $form = array();
-
-  $form['topbar_msg_enable'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Enable'),
-    '#default_value' => variable_get('topbar_msg_enable', 0),
-  );
-  $form['topbar_msg_display'] = array(
-    '#type' => 'radios',
-    '#title' => t('Display'),
-    '#default_value' => variable_get('topbar_msg_display', 0),
-    '#options' => array(
-      t('Everywhere'),
-      t('Just Homepage'),
-      t('Everywhere but Homepage'),
-    ),
-  );
-  $form['topbar_msg_message'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Message'),
-    '#default_value' => variable_get('topbar_msg_message', 'No message added yet'),
-    '#maxlength' => '100',
-    '#description' => 'Max length: 100 characters.',
-  );
-  $form['topbar_msg_link_text'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Link Text'),
-    '#default_value' => variable_get('topbar_msg_link_text', 'Modify Settings'),
-    '#maxlength' => '15',
-    '#description' => 'Max length: 15 characters.',
-  );
-  $form['topbar_msg_link'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Link'),
-    '#default_value' => variable_get('topbar_msg_link', 'admin/config/system/topmessage'),
-    '#description' => 'Prepend protocol (ie. http://) for external URLs.',
-  );
-  $form['topbar_msg_new_window_link'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Open Link in new window'),
-    '#default_value' => variable_get('topbar_msg_new_window_link', TRUE),
-  );
-  $form['topbar_msg_autohide'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Autohide'),
-    '#default_value' => variable_get('topbar_msg_autohide', FALSE),
-  );
-  $form['topbar_msg_autohide_seconds'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Autohide seconds'),
-    '#default_value' => variable_get('topbar_msg_autohide_seconds', 5),
-    '#maxlength' => '5',
-  );
-  $form['topbar_msg_cookie'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Cookie'),
-    '#default_value' => variable_get('topbar_msg_cookie', FALSE),
-  );
-  $form['topbar_msg_cookie_expire'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Cookie expire (days)'),
-    '#default_value' => variable_get('topbar_msg_cookie_expire', 1),
-    '#maxlength' => '5',
-  );
-
-  if (module_exists('color')) {
-    drupal_add_css('misc/farbtastic/farbtastic.css');
-    drupal_add_js('misc/farbtastic/farbtastic.js');
-
-    $form['topbar_msg_color_bg'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Background color'),
-      '#default_value' => variable_get('topbar_msg_color_bg', '#C79F27'),
-      '#maxlength' => 7,
-      '#size' => 7,
-      '#description' => '<div id="topbar-msg-color-bg-picker"></div>',
-    );
-    $form['colorpicker_bg'] = array(
-      '#type' => 'item',
-      '#description' => "<script type='text/javascript'>
-        (function($) {
-          $(document).ready(function() {
-            $('#topbar-msg-color-bg-picker').farbtastic('#edit-topbar-msg-color-bg');
-          });
-        }) (jQuery);
-      </script>",
-    );
-    $form['topbar_msg_color_text'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Text color'),
-      '#default_value' => variable_get('topbar_msg_color_text', '#FFFFFF'),
-      '#maxlength' => 7,
-      '#size' => 7,
-      '#description' => '<div id="topbar-msg-color-text-picker"></div>',
-    );
-    $form['colorpicker_text'] = array(
-      '#type' => 'item',
-      '#description' => "<script type='text/javascript'>
-        (function($) {
-          $(document).ready(function() {
-            $('#topbar-msg-color-text-picker').farbtastic('#edit-topbar-msg-color-text');
-          });
-        }) (jQuery);
-      </script>",
-    );
-    $form['topbar_msg_color_link'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Link color'),
-      '#default_value' => variable_get('topbar_msg_color_link', '#FFFFFF'),
-      '#maxlength' => 7,
-      '#size' => 7,
-      '#description' => '<div id="topbar-msg-color-link-picker"></div>',
-    );
-    $form['colorpicker_link'] = array(
-      '#type' => 'item',
-      '#description' => "<script type='text/javascript'>
-        (function($) {
-          $(document).ready(function() {
-            $('#topbar-msg-color-link-picker').farbtastic('#edit-topbar-msg-color-link');
-          });
-        }) (jQuery);
-      </script>",
-    );
-  }
-  else {
-    $form['topbar_msg_color_msg'] = array(
-      '#type' => 'markup',
-      '#markup' => t('Please install Color module to change the topbar color settings.'),
-    );
-  }
-  
-  if (module_exists('context')) {
-    $form['topbar_msg_context'] = array(
-      '#type' => 'checkbox',
-      '#title' => t('Use Context to choose when TopBar message is added to the page.'),
-      '#description' => t('The TopBar message code will be included on all pages of your site by default. You can use <a href="!context_url">Context module</a> to fine tune when and where it will be displayed.', array('!context_url' => url('admin/structure/context'))),
-      '#default_value' => variable_get('topbar_msg_context', 0),
-    );
-  }
-
-  return system_settings_form($form);
-}
-
-
-/**
- * Implements hook_page_alter().
- */
-function topbar_msg_page_alter(&$page) {
-  if (variable_get('topbar_msg_enable', 0)) {
-    $display = variable_get('topbar_msg_display', 0);
-    $is_front = drupal_is_front_page();
-
-    if ($display == 0 || ($display == 1 && $is_front) || ($display == 2 && !$is_front)) {
-      if (!variable_get('topbar_msg_context', 0)) {
-        topbar_msg_add_js();
-      }
-      else {
-        if ($plugin = context_get_plugin('reaction', 'topbar_msg_add')) {
-          if ($plugin->execute()) {
-            topbar_msg_add_js();
-          }
-        }
-      }
-    }
+function topbar_msg_ctools_plugin_api($module, $api) {
+  if ($module == 'context' && $api == 'plugins') {
+    return array('version' => 3);
   }
 }
 
@@ -250,28 +62,20 @@ function topbar_msg_context_registry() {
   return array(
     'reactions' => array(
       'topbar_msg_add' => array(
-        'title' => t('TopBar Message'),
+        'title' => t('Topbar Message'),
         'plugin' => 'topbar_msg_context_reaction_add',
-        'description' => t('Add TopBar message code to the page'),
+        'description' => t('Add Topbar Message to the page.'),
       ),
     ),
   );
 }
 
 /**
- * Notify CTools that we'll be using the plugin API with Context module.
- */
-function topbar_msg_ctools_plugin_api($module, $api) {
-  if ($module == 'context' && $api == 'plugins') {
-    return array('version' => 3);
-  }
-}
-
-/**
- * CTools plugin API hook for Context.
+ * Implements hook_context_plugins().
  */
 function topbar_msg_context_plugins() {
   $plugins = array();
+
   $plugins['topbar_msg_context_reaction_add'] = array(
     'handler' => array(
       'path' => drupal_get_path('module', 'topbar_msg') . '/plugins',
@@ -284,10 +88,57 @@ function topbar_msg_context_plugins() {
   return $plugins;
 }
 
-function topbar_msg_help($path, $arg) {
-  switch ($path) {
-    // Main module help for the topbar_msg module
-    case 'admin/help#topbar_msg':
-      return '<p>' . t('This module creates a top region area for displaying call-to-action messages and a content type for creating those messages with text for links, etc. Topbar messages, color changes, and settings are available on the on the settings page. Display can be set either as site wide or controlled via the context module.', array('@blocks' => url('admin/config/system/topmessage'))) . '</p>';
+/**
+ * Implements hook_page_alter().
+ */
+function topbar_msg_page_alter(&$page) {
+  if (variable_get('topbar_msg_enable', 0)) {
+    $display = variable_get('topbar_msg_display', 0);
+    $is_front = drupal_is_front_page();
+
+    if ($display == 0 || ($display == 1 && $is_front) || ($display == 2 && !$is_front)) {
+      if (!variable_get('topbar_msg_context', 0)) {
+        topbar_msg_display();
+      }
+      // @TODO verify context reaction name (topbar_msg_context_reaction_add?)
+      else if ($plugin = context_get_plugin('reaction', 'topbar_msg_add')) {
+        if ($plugin->execute()) {
+          topbar_msg_display();
+        }
+      }
+    }
   }
+}
+
+/**
+ * Helper function to add Topbar Message to the page.
+ */
+function topbar_msg_display() {
+  $module_path = drupal_get_path('module', 'topbar_msg');
+  $settings = topbar_msg_get_settings();
+
+  drupal_add_css($module_path . '/css/topbar_msg.css');
+  drupal_add_js($module_path . '/js/topbar_msg.js');
+  drupal_add_js(array('topbarMsg' => $settings), 'setting');
+}
+
+/**
+ * Helper function to retrieve settings.
+ */
+function topbar_msg_get_settings() {
+  $settings = array();
+
+  $settings['message'] = variable_get('topbar_msg_message', 'No message added yet');
+  $settings['link_text'] = variable_get('topbar_msg_link_text', 'Modify Settings');
+  $settings['link'] = variable_get('topbar_msg_link', 'admin/config/system/topbar-message');
+  $settings['link_target'] = variable_get('topbar_msg_new_window_link', TRUE) == TRUE ? '_blank' : '';
+  $settings['autohide'] = variable_get('topbar_msg_autohide', FALSE);
+  $settings['autohide_seconds'] = variable_get('topbar_msg_autohide_seconds', 5);
+  $settings['cookie'] = variable_get('topbar_msg_cookie', FALSE);
+  $settings['cookie_expire'] = variable_get('topbar_msg_cookie_expire', 1);
+  $settings['color_bg'] = variable_get('topbar_msg_color_bg', '#000000');
+  $settings['color_text'] = variable_get('topbar_msg_color_text', '#FFFFFF');
+  $settings['color_link'] = variable_get('topbar_msg_color_link', '#FFFFFF');
+
+  return $settings;
 }
