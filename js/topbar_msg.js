@@ -1,38 +1,43 @@
 (function ($) {
-    var duration = 500;
+    var seconds = false,
+      debug = false;
 
     Drupal.behaviors.topbarMsg = {
-        setting_timeout: function(seconds) {
+        setting_timeout: function($body, seconds) {
+            if (debug) {
+                console.log('setting_timeout');
+            }
+
             return setTimeout(function() {
-                Drupal.behaviors.topbarMsg.close_topbar(true);
+                Drupal.behaviors.topbarMsg.close_topbar($body, true);
             }, seconds);
         },
 
         close_topbar: function($body, animate) {
-            $body.removeClass('topbarmsg-open');
+            if (debug) {
+                console.log('close_topbar');
+            }
+
+            $body.removeClass('topbar-message-opened');
 
             if(animate) {
-                $body.addClass('topbarmsg-transition');
-                $('#topbarmsg-wrapper').slideUp(duration);
-                $('#topbarmsg-open').slideDown(duration);
-            }
-            else {
-                $('#topbarmsg-wrapper').hide();
-                $('#topbarmsg-open').show();
+                $body.addClass('topbar-message-transition');
             }
         },
 
         open_topbar: function($body, animate) {
-            $body.addClass('topbarmsg-open');
+            if (debug) {
+                console.log('open_topbar');
+            }
+
+            $body.addClass('topbar-message-opened');
 
             if(animate) {
-                $body.addClass('topbarmsg-transition');
-                $('#topbarmsg-wrapper').slideDown(duration);
-                $('#topbarmsg-open').slideUp(duration);
+                $body.addClass('topbar-message-transition');
             }
-            else {
-                $('#topbarmsg-wrapper').show();
-                $('#topbarmsg-open').hide();
+
+            if (seconds) {
+                Drupal.behaviors.topbarMsg.setting_timeout($body, seconds);
             }
         },
 
@@ -40,26 +45,22 @@
             var $body = $('body', context);
 
             $body.once('topbarMsg', function() {
-                var text = '<div id="topbarmsg-wrapper"><div id="topbarmsg-container">',
-                  link = settings.topbarMsg.link ? '<a href="'+ settings.topbarMsg.link +'" title="'+ settings.topbarMsg.link_text +'" target="'+ settings.topbarMsg.link_target +'" id="topbarmsg-logo">'+ settings.topbarMsg.link_text +'</a>' : '';
+                var text = '<div id="topbar-message"><div id="topbar-message-wrapper">',
+                  link = settings.topbarMsg.link ? '<a href="'+ settings.topbarMsg.link +'" title="'+ settings.topbarMsg.link_text +'" target="'+ settings.topbarMsg.link_target +'" id="topbar-message-link">'+ settings.topbarMsg.link_text +'</a>' : '';
 
-                text += '<div id="topbarmsg-content">' + settings.topbarMsg.message + link + '</div>';
-                text += '<a id="topbarmsg-close">Close</a>';
-                text += '<div id="topbarmsg-shadow"></div>';
-                text += '</div></div>';
-                text += '<a id="topbarmsg-open" style="">Open</a>';
+                text += '<div id="topbar-message-content">' + settings.topbarMsg.message + link + '</div>';
+                text += '<a id="topbar-message-close">Close</a>';
+                text += '</div><a id="topbar-message-open">Open</a>';
+                text += '</div>';
 
                 $body.prepend(text);
 
-                $('#topbarmsg-wrapper', $body).hide();
-                $('#topbarmsg-container', $body).css({'color' : settings.topbarMsg.color_text});
-                $('#topbarmsg-container, #topbarmsg-open', $body).css({'background-color' : settings.topbarMsg.color_bg});
-                $('#topbarmsg-container #topbarmsg-logo', $body).css({'color' : settings.topbarMsg.color_link});
+                $('#topbar-message', $body).css({'color' : settings.topbarMsg.color_text});
+                $('#topbar-message-wrapper, #topbar-message-open, #topbar-message-close', $body).css({'background-color' : settings.topbarMsg.color_bg});
+                $('#topbar-message-content #topbar-message-link', $body).css({'color' : settings.topbarMsg.color_link});
 
                 if (settings.topbarMsg.autohide) {
-                    var seconds = !isNaN(settings.topbarMsg.autohide_seconds) ? settings.topbarMsg.autohide_seconds * 1000 : 5000;
-
-                    Drupal.behaviors.topbarMsg.setting_timeout(seconds);
+                    seconds = !isNaN(settings.topbarMsg.autohide_seconds) ? settings.topbarMsg.autohide_seconds * 1000 : 5000;
                 }
 
                 if (settings.topbarMsg.cookie) {
@@ -78,8 +79,13 @@
                         Drupal.behaviors.topbarMsg.close_topbar($body);
                     }
                 }
+                else {
+                    Drupal.behaviors.topbarMsg.open_topbar($body);
+                }
 
-                $('#topbarmsg-open').click(function() {
+                $('#topbar-message-open').click(function(event) {
+                    event.preventDefault();
+
                     if (settings.topbarMsg.cookie) {
                         $.cookie('topbar', 'open', {
                             path:'/'
@@ -89,7 +95,9 @@
                     Drupal.behaviors.topbarMsg.open_topbar($body, true);
                 });
 
-                $('#topbarmsg-close').click(function() {
+                $('#topbar-message-close').click(function(event) {
+                    event.preventDefault();
+
                     if (settings.topbarMsg.cookie) {
                         $.cookie('topbar', 'close', {
                             path:'/'
