@@ -27,4 +27,39 @@ function topbar_msg_uninstall() {
   foreach ($variables as $name) {
     variable_del($name);
   }
+
+  //Delete nodes and node types
+  topbar_msg_delete_nodes();
+}
+
+function topbar_msg_delete_nodes() {
+  
+  $nids = array();
+  $types = array('topbar_message');
+  
+  foreach($types as $type) {
+    // Delete nodes
+    $results = db_select('node', 'n')
+                ->fields('n', array('nid'))
+                ->condition('type', $type)
+                ->execute();
+    foreach ($results as $result) {
+      $nids[] = $result->nid;
+    }
+    if (count($nids)>0) {
+      node_delete_multiple($nids);
+      drupal_set_message(t('%count nodes has been deleted.', array('%count' => count($nids))));
+    }
+    
+    // Delete content type
+    if (node_type_load($type)) {
+      node_type_delete($type);
+      variable_del('node_preview_' . $type);
+      drupal_set_message(t('%type content type has been deleted.', array('%type' => $type)));
+    }
+  }
+  
+  node_types_rebuild();
+  menu_rebuild();
+  
 }
